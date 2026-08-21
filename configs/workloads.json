@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "defaults": {
+    "ioengine": "libaio",
+    "direct": true,
+    "group_reporting": true,
+    "percentile_list": [50.0, 95.0, 99.0, 99.9]
+  },
+  "profiles": {
+    "smoke": {
+      "runtime_seconds": 5,
+      "ramp_seconds": 1,
+      "repetitions": 1,
+      "target_fraction": 0.25,
+      "precondition_rounds": 0,
+      "workloads": ["randread-4k-qd1", "randwrite-4k-qd1"]
+    },
+    "full": {
+      "runtime_seconds": 60,
+      "ramp_seconds": 10,
+      "repetitions": 3,
+      "target_fraction": 0.8,
+      "precondition_rounds": 2,
+      "workloads": [
+        "read-128k-qd1",
+        "read-128k-qd32",
+        "randread-4k-qd1",
+        "randread-4k-qd32",
+        "write-128k-qd1",
+        "write-128k-qd32",
+        "randwrite-4k-qd1",
+        "randwrite-4k-qd32",
+        "randrw70-4k-qd32",
+        "randrw30-4k-qd32"
+      ]
+    }
+  },
+  "workloads": {
+    "read-128k-qd1": {"rw": "read", "bs": "128k", "iodepth": 1},
+    "read-128k-qd32": {"rw": "read", "bs": "128k", "iodepth": 32},
+    "randread-4k-qd1": {"rw": "randread", "bs": "4k", "iodepth": 1},
+    "randread-4k-qd32": {"rw": "randread", "bs": "4k", "iodepth": 32},
+    "write-128k-qd1": {"rw": "write", "bs": "128k", "iodepth": 1},
+    "write-128k-qd32": {"rw": "write", "bs": "128k", "iodepth": 32},
+    "randwrite-4k-qd1": {"rw": "randwrite", "bs": "4k", "iodepth": 1},
+    "randwrite-4k-qd32": {"rw": "randwrite", "bs": "4k", "iodepth": 32},
+    "randrw70-4k-qd32": {"rw": "randrw", "rwmixread": 70, "bs": "4k", "iodepth": 32},
+    "randrw30-4k-qd32": {"rw": "randrw", "rwmixread": 30, "bs": "4k", "iodepth": 32}
+  }
+}
+
