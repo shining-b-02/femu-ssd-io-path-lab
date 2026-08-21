@@ -1,5 +1,10 @@
 # Experiment plan
 
+> **Execution status:** completed on 2026-08-22 KST. The five full run
+> directories, actual launch matrix, and hashes are indexed in
+> `results/README.md` and `results/EXPERIMENT_MANIFEST.md`. Measured conclusions
+> are in `docs/ANALYSIS_REPORT_KO.md`.
+
 ## 1. 목표
 
 SSD I/O path의 관찰 가능한 결과를 단순 benchmark 점수가 아닌 FTL 내부 동작과 연결한다. 주요 종속변수는 total IOPS, bandwidth, read/write completion latency의 p99/p99.9, 그리고 host write 대비 GC relocation write의 비율인 interval WAF다.
@@ -63,7 +68,8 @@ mapping은 page, high threshold는 95로 고정한다. 따라서 threshold 90도
 
 ## 6. WAF 정의
 
-FEMU master는 NVMe SMART log vendor-specific 영역에 다음 값을 제공한다.
+실험에 고정한 FEMU revision `39664d2424eaa4ebdcf8400f8973d3ad445644a6`은
+NVMe SMART log vendor-specific 영역에 다음 값을 제공한다.
 
 - byte 192: `waf_x1000` (little-endian uint32)
 - byte 200: host write pages (little-endian uint64)
@@ -99,3 +105,21 @@ read-only workload처럼 host write delta가 0이면 구간 WAF를 1.0으로 기
 
 후속 실험에서는 workload별 fresh boot, runtime 확대, CPU pinning, host-side QEMU thread profiling으로 위협을 줄인다.
 
+## 9. 실제 실행 결과와 설계 판정
+
+| Phase | 완료 데이터 | 판정 |
+|---|---|---|
+| A | page-gc75, 10 workload × 3회 | QD throughput/tail trade-off 관찰. Pattern과 block size가 함께 변해 H1은 검정 불충분 |
+| B | page/DFTL 4 MiB/hybrid, 각 10 × 3회 | DFTL translation penalty와 hybrid full-merge 붕괴 관찰 |
+| C | page GC 50/75/90, 각 10 × 3회 | 이 window에서 50의 relocation/WAF가 가장 높고 75의 전체 aggregate가 가장 좋음 |
+
+각 condition은 fresh guest overlay와 fresh FEMU process를 사용했지만 condition 내부
+workload 순서는 고정했다. 따라서 독립성은 condition 단위이며 workload 단위가
+아니다. 분석은 smoke를 섞지 않도록 profile을 명시한다.
+
+```bash
+python3 -m ssdbench.analyze \
+  --input results \
+  --output results/report \
+  --profile full
+```

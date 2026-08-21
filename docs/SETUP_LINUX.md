@@ -60,6 +60,18 @@ host에서 실행한다.
   --gc-threshold 75
 ```
 
+Cloud-init으로 guest를 처음 준비하는 경우 NoCloud seed를 read-only virtio drive로
+추가할 수 있다.
+
+```bash
+./scripts/launch_femu.sh \
+  --build-dir /absolute/path/to/FEMU/build-femu \
+  --image /absolute/path/to/ubuntu-prepared.qcow2 \
+  --cloud-init-seed /absolute/path/to/seed.iso \
+  --mapping page \
+  --gc-threshold 75
+```
+
 guest에서 검사한다.
 
 ```bash
@@ -88,7 +100,9 @@ smoke 결과가 정상일 때만 `--profile full`을 실행한다.
 
 ## 6. condition matrix
 
-한 condition의 full run이 끝날 때마다 guest를 정상 종료하고 다음 FEMU process를 새로 시작한다.
+한 condition의 full run이 끝날 때마다 guest를 정상 종료한다. 동일한 prepared
+base에서 condition별 새 qcow2 overlay를 만든 뒤 다음 FEMU process를 시작한다.
+FEMU의 DRAM state뿐 아니라 guest OS disk 변경도 condition 사이에 섞이지 않게 한다.
 
 | Condition | launch option |
 |---|---|
@@ -105,8 +119,12 @@ guest runner의 `--condition`, `--mapping`, `--gc-threshold` metadata가 host la
 모든 `results/<timestamp>__<condition>` 디렉터리를 한곳에 모은 뒤 실행한다.
 
 ```bash
-python3 -m ssdbench.analyze --input results --output results/report
+python3 -m ssdbench.analyze \
+  --input results \
+  --output results/report \
+  --profile full
 ```
 
 raw JSON과 SMART binary log를 지우지 않는다. 분석 코드가 바뀌어도 원본에서 다시 계산할 수 있어야 한다.
-
+Smoke와 full directory가 함께 있으면 `--profile full`을 생략한 분석기는 혼합을
+막기 위해 중단한다. 완료된 artifact 구조와 검증 방법은 `results/README.md`를 따른다.

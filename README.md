@@ -1,150 +1,141 @@
 # FEMU SSD I/O Path Lab
 
-FEMU의 NVMe black-box SSD를 대상으로 workload, FTL mapping, GC threshold가 IOPS와 tail latency, write amplification에 미치는 영향을 재현 가능한 방법으로 측정하는 독립 프로젝트입니다.
+FEMU NVMe black-box SSD에서 workload, FTL mapping, GC trigger가 IOPS, tail
+latency, write amplification(WAF)에 미치는 영향을 같은 환경에서 측정한 재현
+가능한 실험입니다. x86_64 Linux/KVM에서 실제 FEMU를 빌드하고 5개 full
+condition, 150개 fio 반복 측정과 전후 SMART 원본을 완료했습니다.
 
-## 연구 질문
+고정 FEMU revision은
+`39664d2424eaa4ebdcf8400f8973d3ad445644a6`입니다.
 
-> 같은 NAND timing과 SSD geometry에서 workload 특성 및 FTL 정책 변화는 throughput, p99/p99.9 latency, WAF 사이에 어떤 trade-off를 만드는가?
+## 완료 상태
 
-첫 실험은 아래 두 축을 분리해서 비교합니다.
+- [x] x86_64/KVM host와 `/dev/kvm` 접근 검증
+- [x] 고정 revision FEMU 빌드 및 binary/device/hash 검증
+- [x] Ubuntu guest 준비, FEMU namespace 식별, smoke test
+- [x] Phase A: page mapping의 10개 workload 특성 측정
+- [x] Phase B: page/DFTL 4 MiB/hybrid mapping 비교
+- [x] Phase C: page mapping의 GC threshold 50/75/90 비교
+- [x] 각 condition의 fresh overlay, 3회 반복, raw fio/SMART 보존
+- [x] 통합 CSV/Markdown/SVG, 변동성 표, source-level 원인 조사
+- [x] host/guest/build/run provenance와 전체 SHA-256 manifest 보존
 
-1. `mapping=page|dftl|hybrid` 비교 (`gc_thres_pcent=75` 고정)
-2. `gc_thres_pcent=50|75|90` 비교 (`mapping=page` 고정)
+## 실행 환경과 방법
 
-workload는 sequential/random, read/write, 70:30 및 30:70 read/write mix, queue depth 1/32를 포함합니다. 각 측정은 3회 반복하고 중앙값을 사용합니다.
+| 항목 | 값 |
+|---|---|
+| Host | Ubuntu 24.04.4, Linux 7.0.0-30, x86_64, KVM |
+| CPU / RAM | Intel Core i7-1165G7, 8 logical CPU, 15.3 GiB |
+| FEMU | pinned revision, QEMU 10.1.0, 4 GiB BBSSD |
+| Guest | Ubuntu 24.04.4, Linux 6.8.0-137 |
+| Tools | fio 3.36, nvme-cli 2.8, Python 3.12.3 |
+| Full run | 80% target, precondition 2회, ramp 10초, runtime 60초, 반복 3회 |
+| 공통 정책 | greedy GC, high threshold 95, 동일 NAND timing/geometry |
 
-## 현재 상태
+각 condition은 같은 prepared guest base에서 새 overlay를 만들고 FEMU process를
+새로 시작했습니다. namespace는 model 문자열, 크기, mount 상태를 검사한 뒤에만
+파괴적 fio를 허용했습니다. SMART의 누적값을 그대로 비교하지 않고 각 workload
+전후 `host_write_pages`와 `gc_write_pages` delta로 interval WAF를 계산했습니다.
 
-- [x] FEMU host 요구사항 검사
-- [x] 재현 가능한 FEMU commit 고정
-- [x] mapping/GC parameter를 받는 FEMU launch wrapper
-- [x] raw device 안전 검증이 포함된 `fio` workload runner
-- [x] FEMU SMART vendor field 기반 interval WAF 측정
-- [x] JSON 결과를 CSV/Markdown/SVG로 변환하는 분석기
-- [x] parser와 command builder 단위 테스트
-- [x] Ubuntu CI에서 shell/test/dry-run regression 검증
-- [x] macOS ARM64에서 host-side parser 10,000회 측정 및 증거 JSON 보존
-- [ ] x86_64 Linux/KVM host에서 첫 실측
-- [ ] 실측 결과 기반 가설 검정과 병목 분석
+## 핵심 결과
 
-현재 고정한 FEMU revision은 `39664d2424eaa4ebdcf8400f8973d3ad445644a6`입니다. 숫자를 얻기 전까지 성능 결론은 내리지 않습니다.
+모든 표는 3회 반복 중앙값입니다. mixed workload의 tail은 활성 read/write 방향 중
+더 나쁜 값을 사용합니다.
 
-> **SSD 성능 측정 상태: `X86_64 KVM HOST 확보 전까지 보류`**
+### Phase A — queue depth와 workload
 
-## 현재 검증 결과
+| Workload | QD | IOPS | p99 (us) | p99.9 (us) | WAF |
+|---|---:|---:|---:|---:|---:|
+| randread 4 KiB | 1 | 26,722 | 49.4 | 58.6 | 1.000 |
+| randread 4 KiB | 32 | 308,053 | 166.9 | 212.0 | 1.000 |
+| randwrite 4 KiB | 1 | 4,775 | 226.3 | 354.3 | 1.000 |
+| randwrite 4 KiB | 32 | 145,746 | 252.9 | 3,784.7 | 1.027 |
+| sequential read 128 KiB | 1 | 10,155 | 164.9 | 205.8 | 1.000 |
+| sequential read 128 KiB | 32 | 65,952 | 839.7 | 1,011.7 | 1.000 |
+| sequential write 128 KiB | 1 | 4,597 | 224.3 | 2,146.3 | 1.000 |
+| sequential write 128 KiB | 32 | 9,623 | 5,210.1 | 5,275.6 | 1.000 |
 
-2026-08-21에 Apple Silicon macOS 환경에서 실험 제어 코드와 결과 처리 경로를 직접 실행했습니다.
+QD32는 randread IOPS를 11.53배, randwrite를 30.53배 높였지만 tail도
+증가했습니다. 특히 128 KiB sequential write의 p99는 23.23배가 됐습니다.
+따라서 H2의 throughput/queueing trade-off는 관찰됐습니다. 다만 sequential은
+128 KiB, random은 4 KiB이므로 access pattern만 분리하지 못합니다. 현재 matrix로
+H1의 sequential/random 인과를 확정하지 않습니다.
 
-| 검증 항목 | 결과 |
-|---|---:|
-| Python 단위·파이프라인 테스트 | 10개 통과 |
-| smoke dry-run에서 생성된 `fio` 명령 | 2개 |
-| fio JSON parser 반복 측정 | 10,000회 |
-| parser 중앙값 | 18.084 us/parse |
-| parser p95 | 20.917 us/parse |
-| parser 최댓값 | 230.208 us/parse |
-| GitHub Actions | 성공 |
+![Phase A IOPS](results/report/phase-a/iops.svg)
 
-parser 시간은 SSD 성능이 아니라 **host-side 결과 처리 비용**입니다. 원본 측정 증거는
-[`results/host-parser-macos-arm64-2026-08-21.json`](results/host-parser-macos-arm64-2026-08-21.json),
-전체 해석은 [`docs/ANALYSIS_REPORT_KO.md`](docs/ANALYSIS_REPORT_KO.md)에 보존했습니다.
+### Phase B — FTL mapping
 
-## 왜 별도 Linux host가 필요한가
+| Mapping | randwrite 4K QD32 IOPS | p99 (us) | WAF | randrw70 IOPS | p99 (us) |
+|---|---:|---:|---:|---:|---:|
+| page | 145,746 | 252.9 | 1.027 | 248,805 | 272.4 |
+| DFTL 4 MiB | 98,382 | 880.6 | 1.027 | 154,825 | 700.4 |
+| hybrid | 113.5 | 734,003.2 | 255.642 | 390.8 | 708,837.4 |
 
-현재 개발 머신은 Apple Silicon macOS입니다. FEMU의 정확한 성능 실험은 x86_64 Linux와 KVM hardware virtualization을 요구하므로 이 머신에서 얻은 QEMU/TCG 수치를 성능 결과로 사용하지 않습니다. 공식 요구사항에 맞는 physical x86_64 Linux host 또는 KVM이 노출되는 동등한 환경에서 실행합니다.
+DFTL의 열 workload 전체 normalized geometric mean은 page 대비 IOPS 0.852배,
+p99 1.623배였습니다. source에서 CMT miss가 translation-page NAND read를, dirty
+eviction이 write와 직렬화된 read를 과금하는 경로를 확인했습니다.
 
-UTM에서 x86_64 Linux를 띄우는 것은 가능하지만 Apple Silicon에서는 guest와 host architecture가 달라 hardware virtualization이 아니라 CPU emulation으로 동작합니다. ARM Linux VM의 nested virtualization도 FEMU가 요구하는 x86_64 KVM을 제공하지 않으므로 UTM 결과는 기능 smoke test 외에는 채택하지 않습니다.
+Hybrid의 random write는 page보다 QD1에서 약 1,170배, QD32에서 약 1,284배
+느렸고 interval WAF는 244–259였습니다. 이는 단순한 작은 성능 차가 아닙니다.
+기본 log block이 16개뿐이고 random overwrite가 sequential switch-merge 조건을
+깨뜨려, pool 고갈 때 valid page를 읽고 다시 쓰는 full merge가 반복되는 구현과
+일치합니다.
 
-## 5분 로컬 검증
+![Phase B p99](results/report/phase-b/p99-latency.svg)
 
-macOS에서도 destructive I/O 없이 코드와 명령 생성을 검증할 수 있습니다.
+### Phase C — GC trigger
+
+| Threshold | randwrite 4K QD32 IOPS | p99 (us) | p99.9 (us) | interval WAF |
+|---:|---:|---:|---:|---:|
+| 50 | 135,339 | 280.6 | 8,978.4 | 1.125 |
+| 75 | 145,746 | 252.9 | 3,784.7 | 1.027 |
+| 90 | 143,889 | 272.4 | 2,900.0 | 1.012 |
+
+이 구현은 `gc_thres_lines = (1 - threshold/100) * total_lines`로 변환하고 free
+line 수가 그 이하일 때 GC를 시작합니다. 따라서 50은 더 많은 free line이 남을
+때 일찍 동작했고, 이 측정창에서 relocation과 WAF가 가장 컸습니다. Threshold 75가
+전체 normalized geometric mean에서 가장 좋았지만, read-only workload에도
+condition 간 drift가 있어 고정 workload 순서와 host scheduling의 영향을 배제할
+수 없습니다. 75를 보편적 최적값으로 주장하지 않습니다.
+
+![Phase C WAF](results/report/phase-c/waf.svg)
+
+## 반복 변동과 해석 한계
+
+대부분의 IOPS 반복 상대 범위는 작았고 최댓값은 hybrid randwrite QD1의
+7.61%였습니다. p99 최댓값은 page-gc90 sequential write QD1의 11.26%였습니다.
+반면 p99.9는 hybrid mixed workload에서 크게 흔들렸습니다. randrw30의 범위는
+1.619–10.536초(중앙값 2.265초, 상대 범위 393.7%)였습니다. 이 긴 tail은 실제
+관찰값이지만 3회 반복만으로 안정적인 극단 percentile을 일반화할 수 없습니다.
+
+FEMU는 실제 SSD firmware가 아니며, 한 condition 안의 workload는 고정 순서로
+실행됐습니다. host governor는 `powersave`였고 CPU pinning/perf profiling은 하지
+않았습니다. 결과는 이 revision과 모델 안의 비교입니다.
+
+## 재현과 증거 탐색
 
 ```bash
 make test
 make dry-run
-make host-benchmark
-./scripts/launch_femu.sh \
-  --build-dir /opt/femu/build-femu \
-  --image /var/lib/femu/ubuntu.qcow2 \
-  --mapping page \
-  --gc-threshold 75 \
-  --dry-run
+python3 -m ssdbench.analyze \
+  --input results \
+  --output results/report \
+  --profile full
+(cd results && sha256sum -c SHA256SUMS.txt)
 ```
 
-## 실제 실행 흐름
+- 한국어 상세 분석: [docs/ANALYSIS_REPORT_KO.md](docs/ANALYSIS_REPORT_KO.md)
+- 실험 설계와 위협: [docs/EXPERIMENT_PLAN.md](docs/EXPERIMENT_PLAN.md)
+- source-level I/O path: [docs/IO_PATH.md](docs/IO_PATH.md)
+- Linux/KVM 재현 절차: [docs/SETUP_LINUX.md](docs/SETUP_LINUX.md)
+- raw/derived 결과 인덱스: [results/README.md](results/README.md)
+- 실제 환경·condition manifest: [results/EXPERIMENT_MANIFEST.md](results/EXPERIMENT_MANIFEST.md)
+- 통합 150-run CSV: [results/report/runs.csv](results/report/runs.csv)
+- 전체 중앙값 표: [results/report/REPORT.md](results/report/REPORT.md)
+- 반복 변동성: [results/report/variability.csv](results/report/variability.csv)
 
-### 1. x86_64 Linux host 준비
+`results/host-parser-macos-arm64-2026-08-21.json`의 parser microbenchmark는 이전
+host-side 분석기 검증이며 SSD 성능 수치가 아닙니다.
 
-```bash
-./scripts/check_host.sh
-./scripts/bootstrap_femu.sh --destination /absolute/path/to/FEMU --install-deps
-```
-
-VM image 준비를 포함한 상세 절차는 [docs/SETUP_LINUX.md](docs/SETUP_LINUX.md)에 있습니다.
-
-### 2. host에서 한 condition 실행
-
-```bash
-./scripts/launch_femu.sh \
-  --build-dir /absolute/path/to/FEMU/build-femu \
-  --image /absolute/path/to/u20s.qcow2 \
-  --mapping page \
-  --gc-threshold 75
-```
-
-### 3. guest에서 smoke test
-
-`/dev/nvme0n1`이 FEMU namespace인지 `lsblk`로 확인한 뒤 실행합니다. 아래 명령은 해당 namespace의 데이터를 덮어씁니다.
-
-```bash
-python3 -m ssdbench.run_matrix \
-  --config configs/workloads.json \
-  --profile smoke \
-  --target /dev/nvme0n1 \
-  --condition page-gc75 \
-  --mapping page \
-  --gc-threshold 75 \
-  --output results \
-  --confirm-erase-femu-device
-```
-
-smoke test가 성공하면 `--profile full`로 바꿉니다. 다른 mapping/GC condition은 FEMU를 종료하고 새로 부팅하여 SSD 내부 상태를 초기화한 뒤 같은 절차로 실행합니다.
-
-### 4. 결과 분석
-
-```bash
-python3 -m ssdbench.analyze --input results --output results/report
-```
-
-생성물:
-
-- `runs.csv`: 개별 반복 측정값
-- `summary.csv`: condition/workload별 중앙값
-- `REPORT.md`: 결과 표와 그림
-- `iops.svg`, `p99-latency.svg`, `waf.svg`: 포트폴리오용 초안 그래프
-
-## 저장소 구조
-
-```text
-configs/workloads.json      fio workload와 smoke/full profile
-scripts/check_host.sh       Linux/x86_64/KVM/RAM/CPU 검사
-scripts/bootstrap_femu.sh   고정 revision clone/build
-scripts/launch_femu.sh      mapping/GC condition별 FEMU 실행
-ssdbench/run_matrix.py      안전한 실험 실행 및 provenance 저장
-ssdbench/waf.py             FEMU SMART WAF counter 추출
-ssdbench/analyze.py         CSV/Markdown/SVG 분석 리포트
-docs/EXPERIMENT_PLAN.md     가설, 변수, 절차, 타당성 위협
-docs/IO_PATH.md             관찰할 Linux-to-FTL I/O path
-```
-
-## 프로젝트 완료 기준
-
-- 모든 condition에서 동일한 host/guest/FEMU revision과 workload seed 사용
-- 3회 반복의 median과 변동성을 함께 보고
-- IOPS뿐 아니라 p99/p99.9 및 interval WAF를 함께 해석
-- 예상과 다른 결과도 보존하고 원인을 source/trace 수준에서 조사
-- raw JSON, metadata, 분석 코드까지 공개하여 제3자가 재현 가능
-
-FEMU와 fio의 원 프로젝트 및 라이선스는 각각의 upstream 저장소를 따릅니다.
-
-이 저장소가 작성한 harness와 문서는 MIT License로 배포합니다.
+FEMU와 fio는 각 upstream 라이선스를 따릅니다. 이 저장소가 작성한 harness와
+문서는 MIT License로 배포합니다.
