@@ -1,0 +1,4 @@
+39664d2424eaa4ebdcf8400f8973d3ad445644a6
+QEMU emulator version 10.1.0
+name "femu", bus PCI, desc "FEMU Non-Volatile Memory Express"
+/home/changhyun/Documents/Codex/2026-08-22/files-mentioned-by-the-user-handoff/work/FEMU/build-femu/qemu-system-x86_64 cap_ipc_lock=ep

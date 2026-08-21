@@ -1,0 +1,123 @@
+{
+  "condition": "page-gc90",
+  "config": {
+    "defaults": {
+      "direct": true,
+      "group_reporting": true,
+      "ioengine": "libaio",
+      "percentile_list": [
+        50.0,
+        95.0,
+        99.0,
+        99.9
+      ]
+    },
+    "profiles": {
+      "full": {
+        "precondition_rounds": 2,
+        "ramp_seconds": 10,
+        "repetitions": 3,
+        "runtime_seconds": 60,
+        "target_fraction": 0.8,
+        "workloads": [
+          "read-128k-qd1",
+          "read-128k-qd32",
+          "randread-4k-qd1",
+          "randread-4k-qd32",
+          "write-128k-qd1",
+          "write-128k-qd32",
+          "randwrite-4k-qd1",
+          "randwrite-4k-qd32",
+          "randrw70-4k-qd32",
+          "randrw30-4k-qd32"
+        ]
+      },
+      "smoke": {
+        "precondition_rounds": 0,
+        "ramp_seconds": 1,
+        "repetitions": 1,
+        "runtime_seconds": 5,
+        "target_fraction": 0.25,
+        "workloads": [
+          "randread-4k-qd1",
+          "randwrite-4k-qd1"
+        ]
+      }
+    },
+    "schema_version": 1,
+    "workloads": {
+      "randread-4k-qd1": {
+        "bs": "4k",
+        "iodepth": 1,
+        "rw": "randread"
+      },
+      "randread-4k-qd32": {
+        "bs": "4k",
+        "iodepth": 32,
+        "rw": "randread"
+      },
+      "randrw30-4k-qd32": {
+        "bs": "4k",
+        "iodepth": 32,
+        "rw": "randrw",
+        "rwmixread": 30
+      },
+      "randrw70-4k-qd32": {
+        "bs": "4k",
+        "iodepth": 32,
+        "rw": "randrw",
+        "rwmixread": 70
+      },
+      "randwrite-4k-qd1": {
+        "bs": "4k",
+        "iodepth": 1,
+        "rw": "randwrite"
+      },
+      "randwrite-4k-qd32": {
+        "bs": "4k",
+        "iodepth": 32,
+        "rw": "randwrite"
+      },
+      "read-128k-qd1": {
+        "bs": "128k",
+        "iodepth": 1,
+        "rw": "read"
+      },
+      "read-128k-qd32": {
+        "bs": "128k",
+        "iodepth": 32,
+        "rw": "read"
+      },
+      "write-128k-qd1": {
+        "bs": "128k",
+        "iodepth": 1,
+        "rw": "write"
+      },
+      "write-128k-qd32": {
+        "bs": "128k",
+        "iodepth": 32,
+        "rw": "write"
+      }
+    }
+  },
+  "created_at_utc": "20260821T200244Z",
+  "expected_femu_revision": "39664d2424eaa4ebdcf8400f8973d3ad445644a6",
+  "fio_size_bytes": 3435973836,
+  "gc_threshold": 90,
+  "host": {
+    "kernel": "6.8.0-137-generic",
+    "platform": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "mapping": "page",
+  "profile": "full",
+  "project_git_revision": "00d67436b3484514462413e4ea76db7edfbd23d0",
+  "schema_version": 1,
+  "target": "/dev/nvme0n1",
+  "target_model": "FEMU BlackBox-SSD Controller",
+  "target_size_bytes": 4294967296,
+  "tools": {
+    "fio": "fio-3.36",
+    "nvme_cli": "nvme version 2.8 (git 2.8)"
+  }
+}

@@ -1,0 +1,12 @@
+FEMU host readiness
+  OS:   Linux
+  Arch: x86_64
+[PASS] Linux host
+[PASS] x86_64 architecture
+[PASS] read/write access to /dev/kvm
+[PASS] at least 12 GiB RAM
+[PASS] at least 8 logical CPUs
+[PASS] git installed
+[PASS] Python 3 installed
+
+Host is ready for a FEMU build.

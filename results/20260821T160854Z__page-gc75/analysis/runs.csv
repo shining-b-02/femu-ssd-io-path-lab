@@ -1,0 +1,3 @@
+condition,mapping,gc_threshold,workload,repetition,read_iops,write_iops,total_iops,read_bw_mib_s,write_bw_mib_s,total_bw_mib_s,read_p99_us,write_p99_us,worst_p99_us,read_p999_us,write_p999_us,worst_p999_us,host_write_pages,gc_write_pages,waf
+page-gc75,page,75,randread-4k-qd1,1,148281.943611,0.0,148281.943611,579.2263422012329,0.0,579.2263422012329,9.536,0.0,9.536,15.296,0.0,15.296,0,0,1.0
+page-gc75,page,75,randwrite-4k-qd1,1,0.0,4801.439712,4801.439712,0.0,18.755623817443848,18.755623817443848,0.0,218.112,218.112,0.0,264.192,264.192,28810,0,1.0

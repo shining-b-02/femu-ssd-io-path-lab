@@ -1,0 +1,160 @@
+HOSTNAME
+ Static hostname: femu-lab
+       Icon name: computer-vm
+         Chassis: vm 🖴
+      Machine ID: 4815539304d9453b9033264c926017d1
+         Boot ID: bf7f04059e764db4bcdfacfc55cea189
+  Virtualization: kvm
+Operating System: Ubuntu 24.04.4 LTS
+          Kernel: Linux 6.8.0-137-generic
+    Architecture: x86-64
+ Hardware Vendor: QEMU
+  Hardware Model: Standard PC _i440FX + PIIX, 1996_
+Firmware Version: rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org
+   Firmware Date: Tue 2014-04-01
+    Firmware Age: 12y 4month 2w 6d
+BLOCK_DEVICES
+NAME           SIZE TYPE FSTYPE  MODEL                        MOUNTPOINTS
+fd0            4096 disk                                      
+sda     21474836480 disk         QEMU HARDDISK                
+├─sda1  20400029184 part ext4                                 /
+├─sda14     4194304 part                                      
+├─sda15   111149056 part vfat                                 /boot/efi
+└─sda16   957350400 part ext4                                 /boot
+vda          374784 disk iso9660                              
+nvme0n1  4294967296 disk         FEMU BlackBox-SSD Controller 
+NVME_LIST
+Node                  Generic               SN                   Model                                    Namespace  Usage                      Format           FW Rev  
+--------------------- --------------------- -------------------- ---------------------------------------- ---------- -------------------------- ---------------- --------
+/dev/nvme0n1          /dev/ng0n1            vSSD0                FEMU BlackBox-SSD Controller             0x1          4.29  GB /   4.29  GB    512   B +  0 B   1.0     
+NVME_ID_CTRL
+NVME Identify Controller:
+vid       : 0x1d1d
+ssvid     : 0x1af4
+sn        : vSSD0               
+mn        : FEMU BlackBox-SSD Controller            
+fr        : 1.0     
+rab       : 6
+ieee      : b30200
+cmic      : 0
+mdts      : 10
+cntlid    : 0
+ver       : 0x10300
+rtd3r     : 0
+rtd3e     : 0
+oaes      : 0
+ctratt    : 0
+rrls      : 0
+cntrltype : 0
+fguid     : 00000000-0000-0000-0000-000000000000
+crdt1     : 0
+crdt2     : 0
+crdt3     : 0
+nvmsr     : 0
+vwci      : 0
+mec       : 0
+oacs      : 0x102
+acl       : 3
+aerl      : 3
+frmw      : 0xf
+lpa       : 0x7
+elpe      : 3
+npss      : 0
+avscc     : 0
+apsta     : 0
+wctemp    : 0
+cctemp    : 0
+mtfa      : 0
+hmpre     : 0
+hmmin     : 0
+tnvmcap   : 0
+unvmcap   : 0
+rpmbs     : 0
+edstt     : 0
+dsto      : 0
+fwug      : 0
+kas       : 0
+hctma     : 0
+mntmt     : 0
+mxtmt     : 0
+sanicap   : 0
+hmminds   : 0
+hmmaxd    : 0
+nsetidmax : 0
+endgidmax : 0
+anatt     : 0
+anacap    : 0
+anagrpmax : 0
+nanagrpid : 0
+pels      : 0
+domainid  : 0
+megcap    : 0
+sqes      : 0x66
+cqes      : 0x44
+maxcmd    : 0
+nn        : 1
+oncs      : 0x4
+fuses     : 0
+fna       : 0
+vwc       : 0
+awun      : 0
+awupf     : 0
+icsvscc   : 0
+nwpc      : 0
+acwu      : 0
+ocfs      : 0
+sgls      : 0
+mnan      : 0
+maxdna    : 0
+maxcna    : 0
+oaqd      : 0
+subnqn    : nqn.2021-05.org.femu:vSSD0
+ioccsz    : 0
+iorcsz    : 0
+icdoff    : 0
+fcatt     : 0
+msdbd     : 0
+ofcs      : 0
+ps      0 : mp:25.00W operational enlat:16 exlat:4 rrt:0 rrl:0
+            rwt:0 rwl:0 idle_power:- active_power:-
+            active_power_workload:-
+NVME_SMART
+Smart Log for NVME device:nvme0n1 namespace-id:ffffffff
+critical_warning			: 0
+temperature				: 50 °C (323 K)
+available_spare				: 100%
+available_spare_threshold		: 20%
+percentage_used				: 0%
+endurance group critical warning summary: 0
+Data Units Read				: 0 (0.00 B)
+Data Units Written			: 0 (0.00 B)
+host_read_commands			: 0
+host_write_commands			: 0
+controller_busy_time			: 0
+power_cycles				: 0
+power_on_hours				: 0
+unsafe_shutdowns			: 0
+media_errors				: 0
+num_err_log_entries			: 0
+Warning Temperature Time		: 1000
+Critical Composite Temperature Time	: 0
+Thermal Management T1 Trans Count	: 0
+Thermal Management T2 Trans Count	: 0
+Thermal Management T1 Total Time	: 0
+Thermal Management T2 Total Time	: 0
+VERSIONS
+Linux femu-lab 6.8.0-137-generic #137-Ubuntu SMP PREEMPT_DYNAMIC Fri Jul 17 20:28:23 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+fio-3.36
+nvme version 2.8 (git 2.8)
+libnvme version 1.8 (git 1.8)
+Python 3.12.3
+git version 2.43.0
+CLOUD_INIT
+nocloud
+status: done
+extended_status: done
+boot_status_code: enabled-by-generator
+last_update: Thu, 01 Jan 1970 00:00:29 +0000
+detail: DataSourceNoCloud [seed=/dev/vda]
+errors: []
+recoverable_errors: {}

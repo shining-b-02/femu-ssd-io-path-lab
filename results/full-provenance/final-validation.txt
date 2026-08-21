@@ -1,0 +1,37 @@
+Final harness and evidence validation
+Date: 2026-08-22 KST
+
+Harness regression
+- make test: PASS, 13 tests
+- bash -n scripts/*.sh: PASS
+- make dry-run: PASS, 2 smoke fio commands
+- make analyze: PASS with --profile full
+- analyzer without --profile: expected exit 2 because full and smoke coexist
+- git diff --check: PASS
+- local Markdown links: PASS, 8 files checked, 0 missing
+
+Full raw evidence validation
+- full condition directories: 5
+- workload groups per condition: 10
+- fio repetitions per workload: 3
+- full fio JSON files: 150
+- fio job errors: all 0
+- fio job_runtime range: 60000..62017 ms (no short run under 59000 ms)
+- SMART before binary files: 150
+- SMART after binary files: 150
+- SMART binary size: all 512 bytes
+- parsed SMART JSON: all waf_x1000/host_write_pages/gc_write_pages values match raw binaries
+
+Smoke validation
+- condition directories: 1
+- fio JSON files: 2
+- fio job errors: all 0
+
+Derived integrated report
+- runs.csv rows: 150
+- summary.csv rows: 50
+- variability.csv rows: 50
+
+The SHA256SUMS.txt verification is performed after this file and every final
+derived report are frozen, so it is intentionally recorded in repository/commit
+validation rather than recursively inside this pre-manifest note.

@@ -1,0 +1,5 @@
+uid=1000(changhyun) gid=1000(changhyun) groups=1000(changhyun),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),100(users),114(lpadmin),993(kvm)
+crw-rw----+ 1 root kvm 10, 232  8월 22 00:34 /dev/kvm
+KVM access OK
+INFO: /dev/kvm exists
+KVM acceleration can be used

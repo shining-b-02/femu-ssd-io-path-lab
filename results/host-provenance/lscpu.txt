@@ -1,0 +1,45 @@
+아키텍처:                         x86_64
+CPU 동작 모드:                    32-bit, 64-bit
+주소 크기:                        39 bits physical, 48 bits virtual
+바이트 순서:                      Little Endian
+CPU:                              8
+온라인 CPU 목록:                  0-7
+제조자 ID:                        GenuineIntel
+모델 이름:                        11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+CPU 계열:                         6
+모델:                             140
+코어 당 스레드:                   2
+소켓 당 코어 수:                  4
+소켓:                             1
+스테핑:                           1
+CPU 스케일링 MHz:                 50%
+최대 CPU MHz:                     4700.0000
+최소 CPU MHz:                     400.0000
+BogoMIPS:                         5606.40
+플래그:                           fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect user_shstk dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear ibt flush_l1d arch_capabilities
+가상화:                           VT-x
+L1d 캐시:                         192 KiB (인스턴스 4건)
+L1i 캐시:                         128 KiB (인스턴스 4건)
+L2 캐시:                          5 MiB (인스턴스 4건)
+L3 캐시:                          12 MiB (인스턴스 1건)
+NUMA 노드:                        1
+NUMA 노드0 CPU:                   0-7
+Gather data sampling 취약성:      Vulnerable
+Ghostwrite 취약성:                Not affected
+Indirect target selection 취약성: Mitigation; Aligned branch/return thunks
+Itlb multihit 취약성:             Not affected
+L1tf 취약성:                      Not affected
+Mds 취약성:                       Not affected
+Meltdown 취약성:                  Not affected
+Mmio stale data 취약성:           Not affected
+Old microcode 취약성:             Not affected
+Reg file data sampling 취약성:    Not affected
+Retbleed 취약성:                  Not affected
+Spec rstack overflow 취약성:      Not affected
+Spec store bypass 취약성:         Mitigation; Speculative Store Bypass disabled via prctl
+Spectre v1 취약성:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Spectre v2 취약성:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop
+Srbds 취약성:                     Not affected
+Tsa 취약성:                       Not affected
+Tsx async abort 취약성:           Not affected
+Vmscape 취약성:                   Not affected

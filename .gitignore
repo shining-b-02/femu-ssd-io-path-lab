@@ -4,6 +4,3 @@ __pycache__/
 .venv/
 work/
 outputs/
-results/*
-!results/.gitkeep
-!results/host-parser-macos-arm64-2026-08-21.json

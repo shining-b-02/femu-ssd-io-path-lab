@@ -1,0 +1,2 @@
+name "femu", bus PCI, desc "FEMU Non-Volatile Memory Express"
+name "femu-subsys", desc "FEMU NVMe Subsystem (FDP)"

@@ -1,0 +1,19 @@
+NAME          SIZE TYPE FSTYPE   MODEL                    MOUNTPOINTS
+loop0           4K loop squashfs                          /snap/bare/5
+loop1          74M loop squashfs                          /snap/core22/2292
+loop2       251.7M loop squashfs                          /snap/firefox/7766
+loop3        91.7M loop squashfs                          /snap/gtk-common-themes/1535
+loop4        18.5M loop squashfs                          /snap/firmware-updater/210
+loop5       531.4M loop squashfs                          /snap/gnome-42-2204/247
+loop6        10.8M loop squashfs                          /snap/snap-store/1270
+loop7        48.1M loop squashfs                          /snap/snapd/25935
+loop8         576K loop squashfs                          /snap/snapd-desktop-integration/343
+sda             0B disk          Cruzer Snap              
+nvme0n1     953.9G disk          SAMSUNG MZVL21T0HCLR-00B 
+├─nvme0n1p1   260M part vfat                              /boot/efi
+├─nvme0n1p2    16M part                                   
+├─nvme0n1p3 734.5G part ntfs                              
+├─nvme0n1p4   1.2G part ntfs                              
+├─nvme0n1p5    17G part ntfs                              
+├─nvme0n1p6     1G part vfat                              
+└─nvme0n1p7   200G part ext4                              /

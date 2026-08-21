@@ -1,0 +1,81 @@
+[
+    {
+        "children": [
+            {
+                "name": "file",
+                "info": {
+                    "children": [
+                    ],
+                    "virtual-size": 578355200,
+                    "filename": "/home/changhyun/Documents/Codex/2026-08-22/files-mentioned-by-the-user-handoff/work/images/femu-guest-prep.qcow2",
+                    "format": "file",
+                    "actual-size": 578297856,
+                    "format-specific": {
+                        "type": "file",
+                        "data": {
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            }
+        ],
+        "backing-filename-format": "qcow2",
+        "virtual-size": 21474836480,
+        "filename": "/home/changhyun/Documents/Codex/2026-08-22/files-mentioned-by-the-user-handoff/work/images/femu-guest-prep.qcow2",
+        "cluster-size": 65536,
+        "format": "qcow2",
+        "actual-size": 578297856,
+        "format-specific": {
+            "type": "qcow2",
+            "data": {
+                "compat": "1.1",
+                "compression-type": "zlib",
+                "lazy-refcounts": false,
+                "refcount-bits": 16,
+                "corrupt": false,
+                "extended-l2": false
+            }
+        },
+        "full-backing-filename": "/home/changhyun/Documents/Codex/2026-08-22/files-mentioned-by-the-user-handoff/work/images/noble-server-cloudimg-amd64.img",
+        "backing-filename": "/home/changhyun/Documents/Codex/2026-08-22/files-mentioned-by-the-user-handoff/work/images/noble-server-cloudimg-amd64.img",
+        "dirty-flag": false
+    },
+    {
+        "children": [
+            {
+                "name": "file",
+                "info": {
+                    "children": [
+                    ],
+                    "virtual-size": 624447488,
+                    "filename": "/home/changhyun/Documents/Codex/2026-08-22/files-mentioned-by-the-user-handoff/work/images/noble-server-cloudimg-amd64.img",
+                    "format": "file",
+                    "actual-size": 624451584,
+                    "format-specific": {
+                        "type": "file",
+                        "data": {
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            }
+        ],
+        "virtual-size": 3758096384,
+        "filename": "/home/changhyun/Documents/Codex/2026-08-22/files-mentioned-by-the-user-handoff/work/images/noble-server-cloudimg-amd64.img",
+        "cluster-size": 65536,
+        "format": "qcow2",
+        "actual-size": 624451584,
+        "format-specific": {
+            "type": "qcow2",
+            "data": {
+                "compat": "1.1",
+                "compression-type": "zlib",
+                "lazy-refcounts": false,
+                "refcount-bits": 16,
+                "corrupt": false,
+                "extended-l2": false
+            }
+        },
+        "dirty-flag": false
+    }
+]
