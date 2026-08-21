@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: test check-host dry-run analyze
+.PHONY: test check-host dry-run analyze host-benchmark
 
 test:
 	$(PYTHON) -m unittest discover -s tests -v
@@ -22,3 +22,7 @@ dry-run:
 analyze:
 	$(PYTHON) -m ssdbench.analyze --input results --output results/report
 
+host-benchmark:
+	$(PYTHON) scripts/benchmark_parser.py \
+		--input tests/fixtures/mixed.fio.json \
+		--iterations 10000

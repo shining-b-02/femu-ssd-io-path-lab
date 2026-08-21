@@ -23,12 +23,31 @@ workload는 sequential/random, read/write, 70:30 및 30:70 read/write mix, queue
 - [x] JSON 결과를 CSV/Markdown/SVG로 변환하는 분석기
 - [x] parser와 command builder 단위 테스트
 - [x] Ubuntu CI에서 shell/test/dry-run regression 검증
+- [x] macOS ARM64에서 host-side parser 10,000회 측정 및 증거 JSON 보존
 - [ ] x86_64 Linux/KVM host에서 첫 실측
 - [ ] 실측 결과 기반 가설 검정과 병목 분석
 
 현재 고정한 FEMU revision은 `39664d2424eaa4ebdcf8400f8973d3ad445644a6`입니다. 숫자를 얻기 전까지 성능 결론은 내리지 않습니다.
 
-> **Measurement status: `DEFERRED — NO X86_64 KVM HOST`**
+> **SSD 성능 측정 상태: `X86_64 KVM HOST 확보 전까지 보류`**
+
+## 현재 검증 결과
+
+2026-08-21에 Apple Silicon macOS 환경에서 실험 제어 코드와 결과 처리 경로를 직접 실행했습니다.
+
+| 검증 항목 | 결과 |
+|---|---:|
+| Python 단위·파이프라인 테스트 | 10개 통과 |
+| smoke dry-run에서 생성된 `fio` 명령 | 2개 |
+| fio JSON parser 반복 측정 | 10,000회 |
+| parser 중앙값 | 18.084 us/parse |
+| parser p95 | 20.917 us/parse |
+| parser 최댓값 | 230.208 us/parse |
+| GitHub Actions | 성공 |
+
+parser 시간은 SSD 성능이 아니라 **host-side 결과 처리 비용**입니다. 원본 측정 증거는
+[`results/host-parser-macos-arm64-2026-08-21.json`](results/host-parser-macos-arm64-2026-08-21.json),
+전체 해석은 [`docs/ANALYSIS_REPORT_KO.md`](docs/ANALYSIS_REPORT_KO.md)에 보존했습니다.
 
 ## 왜 별도 Linux host가 필요한가
 
@@ -43,6 +62,7 @@ macOS에서도 destructive I/O 없이 코드와 명령 생성을 검증할 수 �
 ```bash
 make test
 make dry-run
+make host-benchmark
 ./scripts/launch_femu.sh \
   --build-dir /opt/femu/build-femu \
   --image /var/lib/femu/ubuntu.qcow2 \

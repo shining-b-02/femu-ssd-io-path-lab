@@ -1,0 +1,17 @@
+{
+  "elapsed_ns_per_parse": {
+    "maximum": 230208,
+    "median": 18084,
+    "p95": 20917
+  },
+  "environment": {
+    "machine": "arm64",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "python": "3.14.0"
+  },
+  "fixture": "tests/fixtures/mixed.fio.json",
+  "iterations": 10000,
+  "measurement_scope": "host-side fio JSON parsing",
+  "schema_version": 1,
+  "warmup_iterations": 100
+}
