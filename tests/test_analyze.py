@@ -8,6 +8,7 @@ from ssdbench.analyze import (
     aggregate,
     collect_rows,
     parse_fio_result,
+    summarize_variability,
     write_bar_svg,
     write_csv,
     write_markdown,
@@ -54,6 +55,12 @@ class AnalyzeTests(unittest.TestCase):
         self.assertEqual(summary[0]["repetitions"], 3)
         self.assertEqual(summary[0]["total_iops"], 20.0)
 
+        variability = summarize_variability(rows)
+        self.assertEqual(variability[0]["total_iops_min"], 10.0)
+        self.assertEqual(variability[0]["total_iops_median"], 20.0)
+        self.assertEqual(variability[0]["total_iops_max"], 100.0)
+        self.assertEqual(variability[0]["total_iops_relative_range_percent"], 450.0)
+
     def test_report_pipeline_from_raw_artifacts(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -94,6 +101,30 @@ class AnalyzeTests(unittest.TestCase):
             self.assertTrue((report_dir / "summary.csv").exists())
             self.assertIn("<svg", (report_dir / "iops.svg").read_text(encoding="utf-8"))
             self.assertIn("page-gc75", (report_dir / "REPORT.md").read_text(encoding="utf-8"))
+
+    def test_collect_rows_filters_metadata_profile(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for profile in ("smoke", "full"):
+                run_dir = root / profile
+                run_dir.mkdir()
+                (run_dir / "metadata.json").write_text(
+                    json.dumps(
+                        {
+                            "condition": "page-gc75",
+                            "mapping": "page",
+                            "gc_threshold": 75,
+                            "profile": profile,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                (run_dir / "mixed__r01.fio.json").write_bytes(FIXTURE.read_bytes())
+
+            rows = collect_rows(root, profile="full")
+
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["condition"], "page-gc75")
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ dry-run:
 		--dry-run
 
 analyze:
-	$(PYTHON) -m ssdbench.analyze --input results --output results/report
+	$(PYTHON) -m ssdbench.analyze --input results --output results/report --profile full
 
 host-benchmark:
 	$(PYTHON) scripts/benchmark_parser.py \

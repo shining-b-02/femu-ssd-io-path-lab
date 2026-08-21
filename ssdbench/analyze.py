@@ -70,7 +70,7 @@ def interval_waf(before: bytes, after: bytes) -> dict[str, float | int]:
     return {"host_write_pages": host_pages, "gc_write_pages": gc_pages, "waf": waf}
 
 
-def collect_rows(root: Path) -> list[dict[str, Any]]:
+def collect_rows(root: Path, profile: str | None = None) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for fio_path in sorted(root.rglob("*.fio.json")):
         if fio_path.name == "precondition.fio.json":
@@ -79,6 +79,8 @@ def collect_rows(root: Path) -> list[dict[str, Any]]:
         if not metadata_path.exists():
             continue
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        if profile is not None and metadata.get("profile") != profile:
+            continue
         stem = fio_path.name.removesuffix(".fio.json")
         if "__r" not in stem:
             continue
@@ -139,6 +141,38 @@ def aggregate(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
         }
         for metric in METRIC_FIELDS:
             item[metric] = statistics.median(float(member[metric]) for member in members)
+        output.append(item)
+    return output
+
+
+VARIABILITY_METRICS = ["total_iops", "worst_p99_us", "worst_p999_us", "waf"]
+
+
+def summarize_variability(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str, str, Any, str], list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        key = (row["condition"], row["mapping"], row["gc_threshold"], row["workload"])
+        grouped[key].append(row)
+
+    output: list[dict[str, Any]] = []
+    for key, members in sorted(grouped.items()):
+        condition, mapping, gc_threshold, workload = key
+        item: dict[str, Any] = {
+            "condition": condition,
+            "mapping": mapping,
+            "gc_threshold": gc_threshold,
+            "workload": workload,
+            "repetitions": len(members),
+        }
+        for metric in VARIABILITY_METRICS:
+            values = [float(member[metric]) for member in members]
+            median = statistics.median(values)
+            item[f"{metric}_min"] = min(values)
+            item[f"{metric}_median"] = median
+            item[f"{metric}_max"] = max(values)
+            item[f"{metric}_relative_range_percent"] = (
+                (max(values) - min(values)) / median * 100 if median else 0.0
+            )
         output.append(item)
     return output
 
@@ -243,15 +277,34 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--profile",
+        help="only aggregate runs whose metadata profile matches this value",
+    )
     args = parser.parse_args()
 
-    raw_rows = collect_rows(args.input)
+    if args.profile is None:
+        profiles = set()
+        for metadata_path in args.input.rglob("metadata.json"):
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            if metadata.get("profile"):
+                profiles.add(str(metadata["profile"]))
+        if len(profiles) > 1:
+            parser.error(
+                "multiple result profiles found "
+                f"({', '.join(sorted(profiles))}); pass --profile to avoid mixing them"
+            )
+
+    raw_rows = collect_rows(args.input, args.profile)
     if not raw_rows:
-        parser.error(f"no experiment result files found under {args.input}")
+        detail = f" for profile {args.profile!r}" if args.profile else ""
+        parser.error(f"no experiment result files found under {args.input}{detail}")
     summary = aggregate(raw_rows)
+    variability = summarize_variability(raw_rows)
     args.output.mkdir(parents=True, exist_ok=True)
     write_csv(args.output / "runs.csv", raw_rows)
     write_csv(args.output / "summary.csv", summary)
+    write_csv(args.output / "variability.csv", variability)
     write_bar_svg(args.output / "iops.svg", summary, "total_iops", "IOPS by condition and workload", "IOPS")
     write_bar_svg(
         args.output / "p99-latency.svg",
@@ -268,4 +321,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

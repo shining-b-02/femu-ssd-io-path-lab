@@ -13,6 +13,7 @@ usage() {
         '  --gc-high-threshold N            (default: 95)' \
         '  --device-size-mb N               (default: 4096)' \
         '  --ssh-port N                     (default: 8080)' \
+        '  --cloud-init-seed PATH           (optional NoCloud seed image)' \
         '  --dry-run'
 }
 
@@ -25,6 +26,7 @@ gc_threshold=75
 gc_high_threshold=95
 device_size_mb=4096
 ssh_port=8080
+cloud_init_seed=''
 dry_run=0
 
 while (($#)); do
@@ -38,6 +40,7 @@ while (($#)); do
         --gc-high-threshold) gc_high_threshold="${2:-}"; shift 2 ;;
         --device-size-mb) device_size_mb="${2:-}"; shift 2 ;;
         --ssh-port) ssh_port="${2:-}"; shift 2 ;;
+        --cloud-init-seed) cloud_init_seed="${2:-}"; shift 2 ;;
         --dry-run) dry_run=1; shift ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown argument: %s\n' "$1" >&2; usage >&2; exit 2 ;;
@@ -46,6 +49,10 @@ done
 
 if [[ -z "$build_dir" || "$build_dir" != /* || -z "$image" || "$image" != /* ]]; then
     printf -- '--build-dir and --image must be absolute paths.\n' >&2
+    exit 2
+fi
+if [[ -n "$cloud_init_seed" && "$cloud_init_seed" != /* ]]; then
+    printf -- '--cloud-init-seed must be an absolute path.\n' >&2
     exit 2
 fi
 case "$mapping" in page|dftl|hybrid|fast) ;; *) printf 'Invalid mapping: %s\n' "$mapping" >&2; exit 2 ;; esac
@@ -66,6 +73,12 @@ if (( ! dry_run )); then
     }
     [[ -x "$qemu_bin" ]] || { printf 'FEMU binary not found: %s\n' "$qemu_bin" >&2; exit 1; }
     [[ -f "$image" ]] || { printf 'VM image not found: %s\n' "$image" >&2; exit 1; }
+    if [[ -n "$cloud_init_seed" ]]; then
+        [[ -f "$cloud_init_seed" ]] || {
+            printf 'Cloud-init seed image not found: %s\n' "$cloud_init_seed" >&2
+            exit 1
+        }
+    fi
     [[ -r /dev/kvm && -w /dev/kvm ]] || { printf 'No read/write access to /dev/kvm.\n' >&2; exit 1; }
 fi
 
@@ -85,6 +98,13 @@ command=(
     -device virtio-scsi-pci,id=scsi0
     -device scsi-hd,drive=hd0
     -drive "file=${image},if=none,aio=native,cache=none,format=qcow2,id=hd0"
+)
+if [[ -n "$cloud_init_seed" ]]; then
+    command+=(
+        -drive "file=${cloud_init_seed},if=virtio,format=raw,readonly=on"
+    )
+fi
+command+=(
     -device "$femu_options"
     -net "user,hostfwd=tcp::${ssh_port}-:22"
     -net nic,model=virtio
@@ -103,4 +123,3 @@ if (( dry_run )); then
 fi
 
 exec "${command[@]}"
-
